@@ -323,45 +323,65 @@ uploadBtn.addEventListener("click", async () => {
     formData.append("file", state.file);
 
     try {
-        const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData
-        });
+    const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+    });
 
-        const result = await response.json();
+    const contentType = response.headers.get("content-type") || "";
+    const text = await response.text();
 
-        if (!response.ok) {
-            throw new Error(result.error || "Upload gagal.");
-        }
+    if (!contentType.includes("application/json")) {
+        console.error("Respons server:", text);
 
-        if (
-            !Array.isArray(result.data) ||
-            !Array.isArray(result.parameters) ||
-            !Array.isArray(result.objects)
-        ) {
-            throw new Error("Format dataset tidak sesuai.");
-        }
-
-        state.data = result;
-        state.selectedParameters = [];
-        state.rules = {};
-        state.softSet = {};
-        state.weights = {};
-        state.result = [];
-        state.best = [];
-        state.maxScore = 0;
-
-        renderDatasetInfo();
-        renderParameters();
-
-        showStep(1);
-    } catch (error) {
-        showError(panel, error.message);
-    } finally {
-        uploadBtn.disabled = !state.file;
-        uploadBtn.textContent = "Upload Dataset";
+        throw new Error(
+            `Server tidak mengirim JSON (HTTP ${response.status}). ` +
+            "Periksa route /api/upload pada Flask."
+        );
     }
-});
+
+    let result;
+
+    try {
+        result = JSON.parse(text);
+    } catch {
+        throw new Error("Respons server bukan JSON yang valid.");
+    }
+
+    if (!response.ok) {
+        throw new Error(result.error || "Upload gagal.");
+    }
+
+    if (
+        !Array.isArray(result.data) ||
+        !Array.isArray(result.parameters) ||
+        !Array.isArray(result.objects)
+    ) {
+        throw new Error("Format dataset tidak sesuai.");
+    }
+
+    state.data = result;
+    state.selectedParameters = [];
+    state.rules = {};
+    state.softSet = {};
+    state.weights = {};
+    state.result = [];
+    state.best = [];
+    state.maxScore = 0;
+
+    renderDatasetInfo();
+    renderParameters();
+
+    showStep(1);
+
+} catch (error) {
+    console.error("Kesalahan upload:", error);
+    showError(panel, error.message);
+
+} finally {
+    uploadBtn.disabled = !state.file;
+    uploadBtn.textContent = "Upload Dataset";
+}
 
 function renderDatasetInfo() {
     document.getElementById("datasetStats").innerHTML = `
