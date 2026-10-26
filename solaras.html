@@ -91,32 +91,28 @@
                                 <h2>Dataset</h2>
                                 <p>
                                     Masukkan dataset dalam format CSV atau Excel dengan format:
-                                    <span
-                                        class="show-image"
-                                        onclick="toggleImage()"
-                                    >
+                                    <span class="show-image" id="showImage">
                                         Lihat contoh format
                                     </span>
                                 </p>
                             </div>
                         </div>
 
-                        <div
-                            id="csvImage"
-                            class="visual-card"
-                            style="display: none;"
-                        >
+                        <div id="csvImage" class="visual-card" hidden>
                             <div class="format-box">
                                 <div class="format-title">
                                     <span>Contoh Format Dataset</span>
-                                    <span
+                                    <button
+                                        type="button"
                                         class="close-format"
-                                        onclick="toggleImage()"
-                                    >×</span>
+                                        id="closeImage"
+                                        aria-label="Tutup contoh format"
+                                    >×</button>
                                 </div>
+                        
                                 <img
                                     src="FormatTabel.png"
-                                    alt="Format dataset CSV"
+                                    alt="Contoh format dataset CSV"
                                 >
                             </div>
                         </div>
