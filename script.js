@@ -17,6 +17,9 @@ const steps = [...document.querySelectorAll(".step")];
 const csvFile = document.getElementById("csvFile");
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInfo = document.getElementById("fileInfo");
+const filePreview = document.getElementById("filePreview");
+const previewTable = document.getElementById("previewTable");
+const previewInfo = document.getElementById("previewInfo");
 
 function showStep(step) {
     if (step < 0 || step >= panels.length) return;
@@ -32,47 +35,15 @@ function showStep(step) {
         button.classList.toggle("done", index < step);
     });
 
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 steps.forEach(button => {
     button.addEventListener("click", () => {
         const target = Number(button.dataset.step);
-
-        if (target <= state.currentStep) {
-            showStep(target);
-        }
+        if (target <= state.currentStep) showStep(target);
     });
 });
-
-function clearError(container) {
-    container.querySelector(".error")?.remove();
-}
-
-function showError(container, message) {
-    clearError(container);
-
-    const error = document.createElement("div");
-    error.className = "error";
-    error.textContent = message;
-
-    container.prepend(error);
-
-    error.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
-}
-
-function toggleImage() {
-    const image = document.getElementById("csvImage");
-
-    image.style.display =
-        image.style.display === "none" ? "block" : "none";
-}
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -85,6 +56,21 @@ function escapeHtml(value) {
 
 function formatScore(score) {
     return `${(score * 100).toFixed(1)}%`;
+}
+
+function clearError(container) {
+    container?.querySelector(".error")?.remove();
+}
+
+function showError(container, message) {
+    if (!container) return;
+
+    clearError(container);
+
+    const error = document.createElement("div");
+    error.className = "error";
+    error.textContent = message;
+    container.prepend(error);
 }
 
 function parseCSV(text) {
@@ -106,19 +92,14 @@ function parseCSV(text) {
                 quoted = !quoted;
             }
         } else if (char === "," && !quoted) {
-            row.push(value);
+            row.push(value.trim());
             value = "";
-        } else if (
-            (char === "\n" || char === "\r") &&
-            !quoted
-        ) {
-            if (char === "\r" && text[i + 1] === "\n") {
-                i++;
-            }
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+            if (char === "\r" && text[i + 1] === "\n") i++;
 
-            row.push(value);
+            row.push(value.trim());
 
-            if (row.some(cell => String(cell).trim() !== "")) {
+            if (row.some(cell => cell !== "")) {
                 rows.push(row);
             }
 
@@ -129,9 +110,13 @@ function parseCSV(text) {
         }
     }
 
-    row.push(value);
+    if (quoted) {
+        throw new Error("Format CSV tidak valid: tanda kutip belum ditutup.");
+    }
 
-    if (row.some(cell => String(cell).trim() !== "")) {
+    row.push(value.trim());
+
+    if (row.some(cell => cell !== "")) {
         rows.push(row);
     }
 
@@ -141,13 +126,11 @@ function parseCSV(text) {
 function parseExcel(arrayBuffer) {
     if (typeof XLSX === "undefined") {
         throw new Error(
-            "Pustaka Excel belum dimuat. Periksa script SheetJS pada HTML."
+            "Pustaka Excel belum dimuat. Periksa koneksi internet."
         );
     }
 
-    const workbook = XLSX.read(arrayBuffer, {
-        type: "array"
-    });
+    const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
     if (!workbook.SheetNames.length) {
         throw new Error("File Excel tidak memiliki lembar kerja.");
@@ -155,29 +138,116 @@ function parseExcel(arrayBuffer) {
 
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    const rows = XLSX.utils.sheet_to_json(worksheet, {
+    return XLSX.utils.sheet_to_json(worksheet, {
         header: 1,
         defval: "",
         raw: false,
         blankrows: false
-    });
-
-    return rows.filter(row =>
-        row.some(cell => String(cell).trim() !== "")
+    }).filter(row =>
+        row.some(value => String(value).trim() !== "")
     );
 }
 
+function validateRows(rows) {
+    if (!Array.isArray(rows) || rows.length < 2) {
+        throw new Error(
+            "Dataset harus memiliki header dan minimal satu baris data."
+        );
+    }
+
+    const headers = rows[0].map(value =>
+        String(value ?? "").trim()
+    );
+
+    if (headers.length < 2) {
+        throw new Error(
+            "Dataset harus memiliki kolom objek dan minimal satu parameter."
+        );
+    }
+
+    if (headers.some(header => !header)) {
+        throw new Error("Semua kolom harus memiliki nama.");
+    }
+
+    if (new Set(headers).size !== headers.length) {
+        throw new Error("Nama kolom tidak boleh duplikat.");
+    }
+
+    const records = rows.slice(1).map((row, index) => {
+        if (row.length > headers.length) {
+            throw new Error(
+                `Baris ${index + 2} memiliki kolom melebihi jumlah header.`
+            );
+        }
+
+        return headers.map((_, columnIndex) =>
+            String(row[columnIndex] ?? "").trim()
+        );
+    });
+
+    if (!records.length) {
+        throw new Error("Dataset tidak memiliki objek.");
+    }
+
+    const objects = records.map(record => record[0]);
+
+    if (objects.some(object => !object)) {
+        throw new Error("Nama objek pada kolom pertama tidak boleh kosong.");
+    }
+
+    if (new Set(objects).size !== objects.length) {
+        throw new Error("Nama objek pada kolom pertama harus unik.");
+    }
+
+    const data = records.map(record =>
+        Object.fromEntries(
+            headers.map((header, index) => [header, record[index]])
+        )
+    );
+
+    const parameters = headers.slice(1).map(name => {
+        const values = records
+            .map(record => record[headers.indexOf(name)])
+            .filter(value => value !== "");
+
+        const numbers = values.map(Number);
+        const numeric = values.length > 0 &&
+            numbers.every(value => Number.isFinite(value));
+
+        return {
+            name,
+            type: numeric ? "numeric" : "categorical",
+            min: numeric ? Math.min(...numbers) : null,
+            max: numeric ? Math.max(...numbers) : null,
+            values: numeric ? [] : [...new Set(values)]
+        };
+    });
+
+    return {
+        data,
+        parameters,
+        objects,
+        rows: records.length,
+        columns: parameters.length,
+        missing: records.reduce(
+            (sum, record) =>
+                sum + record.filter(value => value === "").length,
+            0
+        ),
+        object_column: headers[0],
+        headers
+    };
+}
+
 function renderPreview(rows) {
-    const table = document.getElementById("previewTable");
-    const thead = table.querySelector("thead");
-    const tbody = table.querySelector("tbody");
-    const info = document.getElementById("previewInfo");
+    const thead = previewTable.querySelector("thead");
+    const tbody = previewTable.querySelector("tbody");
 
     thead.innerHTML = "";
     tbody.innerHTML = "";
 
     if (!rows.length) {
-        info.textContent = "Dataset kosong.";
+        previewInfo.textContent = "Dataset kosong.";
         return;
     }
 
@@ -186,7 +256,7 @@ function renderPreview(rows) {
 
     headers.forEach(header => {
         const th = document.createElement("th");
-        th.textContent = String(header ?? "").trim();
+        th.textContent = String(header ?? "");
         headerRow.appendChild(th);
     });
 
@@ -204,184 +274,90 @@ function renderPreview(rows) {
         tbody.appendChild(tr);
     });
 
-    info.textContent =
-        `${rows.length - 1} baris × ${headers.length} kolom`;
+    previewInfo.textContent =
+        `Menampilkan ${Math.min(10, rows.length - 1)} dari ${rows.length - 1} objek.`;
 }
 
-csvFile.addEventListener("change", () => {
-    state.file = csvFile.files[0] || null;
-
-    const preview = document.getElementById("filePreview");
+csvFile.addEventListener("change", async () => {
     const panel = document.querySelector('[data-panel="0"]');
 
     clearError(panel);
 
-    if (!state.file) {
-        uploadBtn.disabled = true;
-        fileInfo.textContent = "";
-        fileInfo.classList.add("hidden");
-        preview.classList.add("hidden");
-        return;
-    }
-
-    const fileName = state.file.name;
-    const extension = fileName.split(".").pop().toLowerCase();
-    const allowedExtensions = ["csv", "xlsx", "xls"];
-
-    if (!allowedExtensions.includes(extension)) {
-        state.file = null;
-        uploadBtn.disabled = true;
-        fileInfo.textContent =
-            "File harus berformat CSV, XLSX, atau XLS.";
-        fileInfo.classList.remove("hidden");
-        preview.classList.add("hidden");
-        return;
-    }
-
+    state.file = null;
+    state.data = null;
     uploadBtn.disabled = true;
-    fileInfo.textContent = `File dipilih: ${fileName}`;
-    fileInfo.classList.remove("hidden");
-    preview.classList.add("hidden");
+    fileInfo.textContent = "";
+    fileInfo.classList.add("hidden");
+    filePreview.classList.add("hidden");
 
-    const reader = new FileReader();
+    const file = csvFile.files?.[0];
+    if (!file) return;
 
-    reader.onload = event => {
-        try {
-            let rows;
+    const extension = file.name.split(".").pop().toLowerCase();
 
-            if (extension === "csv") {
-                rows = parseCSV(event.target.result);
-            } else {
-                rows = parseExcel(event.target.result);
-            }
+    if (!["csv", "xlsx", "xls"].includes(extension)) {
+        showError(panel, "Pilih file dengan format CSV, XLSX, atau XLS.");
+        csvFile.value = "";
+        return;
+    }
 
-            if (!rows.length || rows.length < 2) {
-                throw new Error(
-                    "Dataset harus memiliki judul kolom dan minimal satu baris data."
-                );
-            }
+    try {
+        let rows;
 
-            if (rows[0].length < 2) {
-                throw new Error(
-                    "Dataset harus memiliki minimal dua kolom: objek dan parameter."
-                );
-            }
-
-            const headers = rows[0];
-
-            if (
-                headers.some(
-                    header => String(header ?? "").trim() === ""
-                )
-            ) {
-                throw new Error(
-                    "Semua kolom harus memiliki nama parameter."
-                );
-            }
-
-            renderPreview(rows);
-            preview.classList.remove("hidden");
-            uploadBtn.disabled = false;
-        } catch (error) {
-            console.error("Gagal membaca file:", error);
-
-            state.file = null;
-            uploadBtn.disabled = true;
-            preview.classList.add("hidden");
-
-            showError(
-                panel,
-                error.message || "File tidak dapat dibaca."
-            );
+        if (extension === "csv") {
+            rows = parseCSV(await file.text());
+        } else {
+            rows = parseExcel(await file.arrayBuffer());
         }
-    };
 
-    reader.onerror = () => {
+        const dataset = validateRows(rows);
+
+        state.file = file;
+        state.data = dataset;
+
+        renderPreview(rows);
+        filePreview.classList.remove("hidden");
+
+        fileInfo.textContent =
+            `${file.name} — ${dataset.rows} objek, ` +
+            `${dataset.columns} parameter`;
+
+        fileInfo.classList.remove("hidden");
+        uploadBtn.disabled = false;
+    } catch (error) {
         state.file = null;
-        uploadBtn.disabled = true;
-        preview.classList.add("hidden");
-
-        showError(panel, "File tidak dapat dibaca.");
-    };
-
-    if (extension === "csv") {
-        reader.readAsText(state.file);
-    } else {
-        reader.readAsArrayBuffer(state.file);
+        state.data = null;
+        showError(panel, error.message || "File gagal dibaca.");
     }
 });
 
-uploadBtn.addEventListener("click", async () => {
-    if (!state.file) return;
-
+uploadBtn.addEventListener("click", () => {
     const panel = document.querySelector('[data-panel="0"]');
 
     clearError(panel);
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = "Memproses...";
 
-    const formData = new FormData();
-    formData.append("file", state.file);
-
-    try {
-        const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        const text = await response.text();
-        let result;
-
-        try {
-            result = JSON.parse(text);
-        } catch (error) {
-            console.error("Respons Flask:", text);
-
-            throw new Error(
-                `Respons server bukan JSON (HTTP ${response.status}). ` +
-                "Periksa route /api/upload di app.py."
-            );
-        }
-
-        if (!response.ok) {
-            throw new Error(result.error || "Upload gagal.");
-        }
-
-        if (
-            !Array.isArray(result.data) ||
-            !Array.isArray(result.parameters) ||
-            !Array.isArray(result.objects)
-        ) {
-            throw new Error(
-                "Format dataset dari server tidak sesuai."
-            );
-        }
-
-        state.data = result;
-        state.selectedParameters = [];
-        state.rules = {};
-        state.softSet = {};
-        state.weights = {};
-        state.result = [];
-        state.best = [];
-        state.maxScore = 0;
-
-        renderDatasetInfo();
-        renderParameters();
-        showStep(1);
-
-    } catch (error) {
-        console.error("Kesalahan upload:", error);
-        showError(panel, error.message);
-
-    } finally {
-        uploadBtn.disabled = !state.file;
-        uploadBtn.textContent = "Upload Dataset";
+    if (!state.file || !state.data) {
+        showError(panel, "Pilih file dan pastikan dataset berhasil dibaca.");
+        return;
     }
+
+    state.selectedParameters = [];
+    state.rules = {};
+    state.softSet = {};
+    state.weights = {};
+    state.result = [];
+    state.best = [];
+    state.maxScore = 0;
+
+    renderDatasetInfo();
+    renderParameters();
+    showStep(1);
 });
 
 function renderDatasetInfo() {
-    document.getElementById("datasetStats").innerHTML = `
+    const stats = document.getElementById("datasetStats");
+
+    stats.innerHTML = `
         <div class="stat">
             <div class="number">${state.data.rows}</div>
             <div class="label">Jumlah Objek</div>
@@ -403,25 +379,31 @@ function renderDatasetInfo() {
 }
 
 function renderParameters() {
-    document.getElementById("parameterList").innerHTML =
-        state.data.parameters.map(parameter => `
-            <div class="parameter-card">
-                <label class="check-row">
-                    <input
-                        type="checkbox"
-                        class="parameter-checkbox"
-                        value="${escapeHtml(parameter.name)}"
-                    >
-                    <strong>${escapeHtml(parameter.name)}</strong>
-                </label>
-                <div class="type">
-                    Tipe:
-                    ${parameter.type === "numeric"
-                        ? "Numerik"
-                        : "Kategorikal"}
-                </div>
+    const container = document.getElementById("parameterList");
+
+    container.innerHTML = state.data.parameters.map(parameter => `
+        <div class="parameter-card">
+            <label class="check-row">
+                <input
+                    type="checkbox"
+                    class="parameter-checkbox"
+                    value="${escapeHtml(parameter.name)}"
+                >
+                <strong>${escapeHtml(parameter.name)}</strong>
+            </label>
+            <div class="type">
+                Tipe:
+                ${parameter.type === "numeric" ? "Numerik" : "Kategorikal"}
             </div>
-        `).join("");
+            <div class="type">
+                ${
+                    parameter.type === "numeric"
+                        ? `Rentang ${parameter.min}–${parameter.max}`
+                        : `Kategori: ${parameter.values.map(escapeHtml).join(", ")}`
+                }
+            </div>
+        </div>
+    `).join("");
 }
 
 function renderRules() {
@@ -437,11 +419,10 @@ function renderRules() {
 
         if (parameter.type === "numeric") {
             container.insertAdjacentHTML("beforeend", `
-                <div
-                    class="rule-card"
-                    data-parameter="${escapeHtml(parameter.name)}"
-                >
+                <div class="rule-card"
+                     data-parameter="${escapeHtml(parameter.name)}">
                     <h3>${escapeHtml(parameter.name)}</h3>
+
                     <div class="rule-controls">
                         <select class="operator">
                             <option value="≥">≥</option>
@@ -449,6 +430,7 @@ function renderRules() {
                             <option value=">">&gt;</option>
                             <option value="<">&lt;</option>
                         </select>
+
                         <input
                             type="number"
                             class="numeric-value"
@@ -459,23 +441,20 @@ function renderRules() {
                             required
                         >
                     </div>
+
                     <div class="type">
-                        Rentang data:
-                        ${escapeHtml(parameter.min)}
-                        –
-                        ${escapeHtml(parameter.max)}
+                        Rentang data: ${parameter.min}–${parameter.max}
                     </div>
                 </div>
             `);
         } else {
             container.insertAdjacentHTML("beforeend", `
-                <div
-                    class="rule-card"
-                    data-parameter="${escapeHtml(parameter.name)}"
-                >
+                <div class="rule-card"
+                     data-parameter="${escapeHtml(parameter.name)}">
                     <h3>${escapeHtml(parameter.name)}</h3>
+
                     <div class="category-values">
-                        ${(parameter.values || []).map(value => `
+                        ${parameter.values.map(value => `
                             <label>
                                 <input
                                     type="checkbox"
@@ -494,11 +473,8 @@ function renderRules() {
 
 function collectRules() {
     const rules = {};
-
     const cards = [
-        ...document.querySelectorAll(
-            '[data-panel="3"] .rule-card'
-        )
+        ...document.querySelectorAll('[data-panel="3"] .rule-card')
     ];
 
     for (const card of cards) {
@@ -531,13 +507,19 @@ function collectRules() {
                 value
             };
         } else {
+            const values = [
+                ...card.querySelectorAll(".category-checkbox:checked")
+            ].map(input => input.value);
+
+            if (!values.length) {
+                throw new Error(
+                    `Pilih minimal satu kategori untuk ${parameter}.`
+                );
+            }
+
             rules[parameter] = {
                 type: "categorical",
-                values: [
-                    ...card.querySelectorAll(
-                        ".category-checkbox:checked"
-                    )
-                ].map(input => input.value)
+                values
             };
         }
     }
@@ -557,9 +539,7 @@ function satisfiesRule(value, rule) {
     if (rule.type === "numeric") {
         const number = Number(value);
 
-        if (!Number.isFinite(number)) {
-            return false;
-        }
+        if (!Number.isFinite(number)) return false;
 
         switch (rule.operator) {
             case "≥":
@@ -607,20 +587,18 @@ function buildSoftSet() {
 
 function renderSoftSet() {
     document.getElementById("softSetTable").innerHTML =
-        Object.entries(state.softSet).map(
-            ([parameter, members]) => `
-                <tr>
-                    <td>${escapeHtml(parameter)}</td>
-                    <td>
-                        ${
-                            members.length
-                                ? members.map(escapeHtml).join(", ")
-                                : "∅"
-                        }
-                    </td>
-                </tr>
-            `
-        ).join("");
+        Object.entries(state.softSet).map(([parameter, members]) => `
+            <tr>
+                <td>${escapeHtml(parameter)}</td>
+                <td>
+                    ${
+                        members.length
+                            ? members.map(escapeHtml).join(", ")
+                            : "∅"
+                    }
+                </td>
+            </tr>
+        `).join("");
 }
 
 function renderWeights() {
@@ -645,6 +623,7 @@ function renderWeights() {
             <label>
                 <strong>${escapeHtml(parameter)}</strong>
             </label>
+
             <div class="rule-controls">
                 <input
                     type="number"
@@ -656,7 +635,6 @@ function renderWeights() {
                     value="${state.weights[parameter] ?? 1}"
                     required
                 >
-                <span>%</span>
             </div>
         </div>
     `).join("");
@@ -670,9 +648,7 @@ function renderWeights() {
 
 function updateWeightTotal() {
     const inputs = [
-        ...document.querySelectorAll(
-            '[data-panel="5"] .weight-input'
-        )
+        ...document.querySelectorAll('[data-panel="5"] .weight-input')
     ];
 
     const total = inputs.reduce((sum, input) => {
@@ -686,18 +662,14 @@ function updateWeightTotal() {
     const totalElement = document.getElementById("weightTotal");
 
     if (totalElement) {
-        totalElement.textContent =
-            `Total bobot: ${total.toFixed(2)}`;
+        totalElement.textContent = `Total bobot: ${total.toFixed(2)}`;
     }
 }
 
 function collectWeights() {
     const weights = {};
-
     const inputs = [
-        ...document.querySelectorAll(
-            '[data-panel="5"] .weight-input'
-        )
+        ...document.querySelectorAll('[data-panel="5"] .weight-input')
     ];
 
     let total = 0;
@@ -723,9 +695,7 @@ function collectWeights() {
     }
 
     if (total <= 0) {
-        throw new Error(
-            "Total bobot harus lebih besar dari 0."
-        );
+        throw new Error("Total bobot harus lebih besar dari 0.");
     }
 
     state.weights = weights;
@@ -758,11 +728,9 @@ function calculateRanking() {
             0
         );
 
-        const score = weightedScore / totalWeight;
-
         return {
             Nama: name,
-            Score: score,
+            Score: weightedScore / totalWeight,
             "Parameter Terpenuhi": satisfied,
             _originalIndex: index
         };
@@ -833,9 +801,7 @@ function renderRecommendations() {
 
         const specifications = originalData
             ? Object.entries(originalData)
-                .filter(([key]) =>
-                    key !== state.data.object_column
-                )
+                .filter(([key]) => key !== state.data.object_column)
                 .map(([key, value]) => `
                     <div class="specification">
                         <span>${escapeHtml(key)}</span>
@@ -847,13 +813,10 @@ function renderRecommendations() {
 
         return `
             <div class="recommendation-card">
-                <div class="rank">
-                    PERINGKAT ${item.Peringkat}
-                </div>
+                <div class="rank">PERINGKAT ${item.Peringkat}</div>
                 <h3>${escapeHtml(item.Nama)}</h3>
-                <div class="score">
-                    ${formatScore(item.Score)}
-                </div>
+                <div class="score">${formatScore(item.Score)}</div>
+
                 <p>
                     Parameter terpenuhi:
                     ${
@@ -864,6 +827,7 @@ function renderRecommendations() {
                             : "Tidak ada"
                     }
                 </p>
+
                 <div class="specifications">
                     <h4>Spesifikasi</h4>
                     ${specifications}
@@ -881,6 +845,15 @@ document.querySelectorAll(".next").forEach(button => {
         clearError(panel);
 
         try {
+            if (step === 0) {
+                if (!state.data) {
+                    throw new Error("Upload dataset terlebih dahulu.");
+                }
+
+                showStep(1);
+                return;
+            }
+
             if (step === 1) {
                 showStep(2);
                 return;
@@ -894,9 +867,7 @@ document.querySelectorAll(".next").forEach(button => {
                 ].map(input => input.value);
 
                 if (!selected.length) {
-                    throw new Error(
-                        "Pilih minimal satu parameter."
-                    );
+                    throw new Error("Pilih minimal satu parameter.");
                 }
 
                 state.selectedParameters = selected;
@@ -940,17 +911,9 @@ document.querySelectorAll(".next").forEach(button => {
             if (step === 6) {
                 renderRecommendations();
                 showStep(7);
-                return;
-            }
-
-            if (step === 0) {
-                showError(
-                    panel,
-                    "Upload dataset terlebih dahulu."
-                );
             }
         } catch (error) {
-            showError(panel, error.message);
+            showError(panel, error.message || "Terjadi kesalahan.");
         }
     });
 });
@@ -975,15 +938,14 @@ document.getElementById("restartBtn").addEventListener("click", () => {
 
     csvFile.value = "";
     uploadBtn.disabled = true;
-    uploadBtn.textContent = "Upload Dataset";
 
     fileInfo.textContent = "";
     fileInfo.classList.add("hidden");
 
-    document.getElementById("filePreview").classList.add("hidden");
-    document.getElementById("previewInfo").textContent = "";
-    document.querySelector("#previewTable thead").innerHTML = "";
-    document.querySelector("#previewTable tbody").innerHTML = "";
+    filePreview.classList.add("hidden");
+    previewInfo.textContent = "";
+    previewTable.querySelector("thead").innerHTML = "";
+    previewTable.querySelector("tbody").innerHTML = "";
 
     document.getElementById("datasetStats").innerHTML = "";
     document.getElementById("universeList").innerHTML = "";
@@ -995,7 +957,7 @@ document.getElementById("restartBtn").addEventListener("click", () => {
     document.getElementById("recommendationSummary").innerHTML = "";
     document.getElementById("recommendationCards").innerHTML = "";
 
-    panels.forEach(clearError);
+    panels.forEach(panel => clearError(panel));
 
     showStep(0);
 });
