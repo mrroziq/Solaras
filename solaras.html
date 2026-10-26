@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        >
+        <title>Solaras</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <div class="app">
+            <header class="app-navbar">
+                <a href="index.html" class="home-button">Home</a>
+                <div class="brand">Solaras</div>
+            </header>
+
+            <main class="main-content">
+                <section class="hero">
+                    <h1 class="brand">Solaras</h1>
+                    <p>Aplikasi pemilihan objek berbasis soft set melalui pembentukan parameter, pembobotan, dan pemeringkatan untuk menghasilkan rekomendasi.</p>
+                </section>
+                <nav class="steps">
+                    <button
+                        class="step active"
+                        data-step="0"
+                    >
+                        <span>1</span>
+                        <label>Dataset</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="1"
+                    >
+                        <span>2</span>
+                        <label>Semesta</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="2"
+                    >
+                        <span>3</span>
+                        <label>Parameter</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="3"
+                    >
+                        <span>4</span>
+                        <label>Batas</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="4"
+                    >
+                        <span>5</span>
+                        <label>Soft Set</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="5"
+                    >
+                        <span>6</span>
+                        <label>Pembobotan</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="6"
+                    >
+                        <span>7</span>
+                        <label>Ranking</label>
+                    </button>
+                    <button
+                        class="step"
+                        data-step="7"
+                    >
+                        <span>8</span>
+                        <label>Rekomendasi</label>
+                    </button>
+                </nav>
+
+                <main>
+                    <section
+                        class="panel active"
+                        data-panel="0"
+                    >
+                        <div class="section-title">
+                            <span>01</span>
+                            <div>
+                                <h2>Dataset</h2>
+                                <p>
+                                    Masukkan dataset dalam format CSV atau Excel dengan format:
+                                    <span
+                                        class="show-image"
+                                        onclick="toggleImage()"
+                                    >
+                                        Lihat contoh format
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            id="csvImage"
+                            class="visual-card"
+                            style="display: none;"
+                        >
+                            <div class="format-box">
+                                <div class="format-title">
+                                    <span>Contoh Format Dataset</span>
+                                    <span
+                                        class="close-format"
+                                        onclick="toggleImage()"
+                                    >×</span>
+                                </div>
+                                <img
+                                    src="FormatTabel.png"
+                                    alt="Format dataset CSV"
+                                >
+                            </div>
+                        </div>
+                        
+                        <label class="upload-box" for="csvFile">
+                            <h3>Upload File CSV atau Excel</h3>
+                            <p>
+                                Kolom pertama digunakan sebagai objek/semesta.
+                            </p>
+                            <input type="file" id="csvFile" accept=".csv,.xlsx,.xls">
+                            <span class="upload-button">
+                                Pilih File
+                            </span>
+                        </label>
+
+                        <div
+                            id="fileInfo"
+                            class="file-info hidden"
+                        ></div>
+
+                        <div
+                            id="filePreview"
+                            class="file-preview hidden"
+                        >
+                            <div class="preview-header">
+                                <h3>Preview Dataset</h3>
+                                <span id="previewInfo"></span>
+                            </div>
+
+                            <div class="preview-table-wrapper">
+                                <table id="previewTable">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn primary"
+                                id="uploadBtn"
+                                disabled
+                            >
+                                Upload Dataset
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="1"
+                    >
+                        <div class="section-title">
+                            <span>02</span>
+                            <div>
+                                <h2>Semesta</h2>
+                                <p>Himpunan objek yang akan diproses.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="stats"
+                            id="datasetStats"
+                        ></div>
+
+                        <div class="card">
+                            <h3>U = Semesta</h3>
+                            <div
+                                id="universeList"
+                                class="tag-list"
+                            ></div>
+                        </div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary next"
+                            >
+                                Pilih Parameter
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="2"
+                    >
+                        <div class="section-title">
+                            <span>03</span>
+                            <div>
+                                <h2>Parameter Soft Set</h2>
+                                <p>Pilih parameter yang digunakan.</p>
+                            </div>
+                        </div>
+
+                        <div
+                            id="parameterList"
+                            class="parameter-grid"
+                        ></div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary next"
+                            >
+                                Atur Batas
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="3"
+                    >
+                        <div class="section-title">
+                            <span>04</span>
+                            <div>
+                                <h2>Batas Parameter</h2>
+                                <p>Tentukan batas atau nilai yang diinginkan.</p>
+                            </div>
+                        </div>
+
+                        <div id="rulesContainer"></div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary next"
+                                id="buildSoftSetBtn"
+                            >
+                                Bentuk Soft Set
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="4"
+                    >
+                        <div class="section-title">
+                            <span>05</span>
+                            <div>
+                                <h2>Soft Set</h2>
+                                <p>Hasil pembentukan himpunan parameter.</p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>F(e)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="softSetTable"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary next"
+                            >
+                                Atur Pembobotan
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="5"
+                    >
+                        <div class="section-title">
+                            <span>06</span>
+                            <div>
+                                <h2>Pembobotan Parameter</h2>
+                                <p>
+                                    Tentukan bobot untuk setiap parameter
+                                    yang digunakan dalam pengambilan keputusan.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="weightContainer"></div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary next"
+                            >
+                                Hitung Ranking
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="6"
+                    >
+                        <div class="section-title">
+                            <span>07</span>
+                            <div>
+                                <h2>Score & Ranking</h2>
+                                <p>
+                                    Ranking berdasarkan bobot parameter
+                                    yang terpenuhi.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Peringkat</th>
+                                        <th>Nama</th>
+                                        <th>Score</th>
+                                        <th>Parameter Terpenuhi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rankingTable"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary next"
+                            >
+                                Lihat Rekomendasi
+                            </button>
+                        </div>
+                    </section>
+
+                    <section
+                        class="panel"
+                        data-panel="7"
+                    >
+                        <div class="section-title">
+                            <span>08</span>
+                            <div>
+                                <h2>Rekomendasi Utama</h2>
+                                <p>Objek dengan score tertinggi.</p>
+                            </div>
+                        </div>
+
+                        <div id="recommendationSummary"></div>
+
+                        <div
+                            id="recommendationCards"
+                            class="recommendation-grid"
+                        ></div>
+
+                        <div class="actions">
+                            <button
+                                type="button"
+                                class="btn secondary prev"
+                            >
+                                Kembali
+                            </button>
+                            <button
+                                type="button"
+                                class="btn primary"
+                                id="restartBtn"
+                            >
+                                Mulai Lagi
+                            </button>
+                        </div>
+                    </section>
+                </main>
+            </main>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+        <script src="script.js"></script>
+    </body>
+</html>

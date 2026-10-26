@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Solaras adalah website rekomendasi berbasis teori soft set dan inverse soft set.">
+    <title>Solaras | Website Rekomendasi Berbasis Soft Set</title>
+    <link rel="stylesheet" href="home.css">
+</head>
+
+<body>
+    <div class="home">
+        <section class="hero-home">
+            <div class="hero-content">
+                <div class="badge">Website Rekomendasi Berbasis Soft Set</div>
+                <h1>Solaras</h1>
+                <h2>Website Rekomendasi<br>Berbasis Soft Set</h2>
+
+            <div class="hero-actions">
+                <a href="solaras.html" class="primary-button">
+                    Mulai Solaras
+                </a>
+
+                <a href="inverse_soft_set.html" class="primary-button">
+                    Mulai Inverse Solaras
+                </a>
+
+                <a href="#tentang" class="secondary-button">
+                    Pelajari Solaras
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visual">
+            <div class="visual-card">
+                <img
+                    src="Screenshot 2026-09-24 123835.png"
+                    alt="Tampilan aplikasi Solaras"
+                >
+            </div>
+        </div>
+    </section>
+
+    <section class="info-section" id="tentang">
+        <div class="section-content">
+            <h2>Apa itu Solaras?</h2>
+
+            <p class="lead">
+                <strong>Solaras</strong> merupakan website yang digunakan untuk
+                menentukan rekomendasi barang berdasarkan parameter dan
+                kriteria yang diinginkan pengguna. Nama Solaras berasal dari
+                kata <em>soft</em> dan <em>selaras</em>. Kata <em>soft</em>
+                merujuk pada teori soft set, sedangkan <em>selaras</em>
+                menggambarkan kesesuaian antara kebutuhan pengguna dan
+                barang yang tersedia dalam dataset.
+            </p>
+
+            <p class="lead">
+                <strong>Inverse Solaras</strong> merupakan fitur untuk
+                menemukan parameter beserta nilai-nilainya berdasarkan
+                objek yang dipilih dari dataset. Pengguna memilih objek
+                terlebih dahulu, kemudian sistem menampilkan karakteristik
+                objek tersebut berdasarkan parameter yang tersedia.
+            </p>
+        </div>
+    </section>
+
+    <section class="concept-section">
+        <div class="section-heading">
+            <h2>Konsep Dasar Solaras</h2>
+        </div>
+
+        <div class="concept-grid">
+            <div class="concept-card">
+                <div class="concept-number">U</div>
+                <h3>Himpunan Semesta</h3>
+                <p>
+                    Himpunan semua objek atau barang yang menjadi
+                    kandidat dalam proses pemilihan. Sedangan P(U)
+                    merupakan kumpulan himpunan bagian dari himpunan semeta U.
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <div class="concept-number">E</div>
+                <h3>Himpunan Parameter</h3>
+                <p>
+                    Himpunan parameter yang memuat karakteristik
+                    atau spesifikasi objek. himpunan A merupakan himpunan bagian dari E.
+                    Sedangan P(E) merupakan kumpulan himpunan bagian dari himpunan parameter E.
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <div class="concept-number">F</div>
+                <h3>Fungsi dari A ke P(U)</h3>
+                <p>
+                    Pemetaan setiap parameter terpilih ke himpunan semesta
+                    yang memenuhi parameter tersebut, di mana
+                    F merupakan pemetaan dari A ke P(U).
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <div class="concept-number">G</div>
+                <h3>Fungsi dari U ke P(E)</h3>
+                <p>
+                    Pemetaan setiap objek ke himpunan parameter yang
+                    dipenuhi oleh objek tersebut, di mana
+                    G pemetaan dari U ke P(E).
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <div class="concept-number">(F,A)</div>
+                <h3>Soft Set</h3>
+                <p>
+                    Pasangan yang menghubungkan parameter terpilih
+                    dengan himpunan objek yang memenuhi parameter tersebut.
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <div class="concept-number">(G,U)</div>
+                <h3>Inverse Soft Set</h3>
+                <p>
+                    Pasangan yang menghubungkan semesta terpilih
+                    dengan himpunan parameter yang memenuhi.
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <div class="concept-number">B</div>
+                <h3>Bobot</h3>
+                <p>
+                    Nilai kepentingan yang diberikan pada setiap parameter
+                    untuk menunjukkan tingkat prioritasnya dalam
+                    proses pemilihan objek berdasarkan kriteria yang ditentukan.
+                </p>
+            </div>
+            
+            <div class="concept-card">
+                <div class="concept-number">S</div>
+                <h3>Score</h3>
+                <p>
+                    Nilai yang menunjukkan tingkat pemenuhan kriteria
+                    oleh suatu objek berdasarkan metode penilaian yang digunakan.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="process-section" id="alur-solaras">
+        <div class="section-heading center">
+            <h2>Alur Kerja Solaras</h2>
+            <p>
+                Proses rekomendasi dilakukan secara bertahap,
+                mulai dari pengunggahan dataset hingga penentuan rekomendasi.
+            </p>
+        </div>
+
+        <div class="process-grid">
+            <div class="process-card">
+                <div class="process-number">01</div>
+                <h3>Dataset</h3>
+                <p>
+                    Pengguna mengunggah dataset dalam format CSV atau Excel.
+                    Baris pertama berisi nama kolom, kolom pertama berisi
+                    identitas objek, dan kolom berikutnya berisi parameter
+                    beserta nilai setiap objek.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">02</div>
+                <h3>Himpunan Semesta</h3>
+                <p>
+                    Himpunan semesta berisi objek-objek yang tersedia
+                    dan menjadi kandidat dalam proses pemilihan.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">03</div>
+                <h3>Himpunan Parameter</h3>
+                <p>
+                    Pengguna menentukan parameter yang relevan dengan
+                    kebutuhan dan karakteristik objek yang akan dipilih.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">04</div>
+                <h3>Batas Parameter</h3>
+                <p>
+                    Pengguna menetapkan batas nilai atau kategori
+                    pada parameter sesuai dengan kebutuhannya.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">05</div>
+                <h3>Soft Set</h3>
+                <p>
+                    Sistem membentuk himpunan objek yang memenuhi
+                    masing-masing parameter berdasarkan batas yang ditentukan.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">06</div>
+                <h3>Pembobotan</h3>
+                <p>
+                    Setiap parameter diberikan bobot sesuai dengan
+                    tingkat kepentingannya bagi pengguna.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">07</div>
+                <h3>Ranking</h3>
+                <p>
+                    Sistem mengurutkan objek berdasarkan skor yang
+                    diperoleh dari pemenuhan parameter dan bobotnya.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">08</div>
+                <h3>Rekomendasi</h3>
+                <p>
+                    Sistem menampilkan hasil pemeringkatan untuk membantu
+                    pengguna menentukan objek yang paling sesuai dengan
+                    kriteria yang ditetapkan.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="process-section" id="alur-inverse">
+        <div class="section-heading center">
+            <h2>Alur Kerja Inverse Solaras</h2>
+            <p>
+                Proses pencarian karakteristik objek berdasarkan
+                parameter dan nilai yang terdapat dalam dataset.
+            </p>
+        </div>
+
+        <div class="inverse-process-grid">
+            <div class="process-card">
+                <div class="process-number">01</div>
+                <h3>Dataset</h3>
+                <p>
+                    Pengguna mengunggah dataset yang berisi objek,
+                    parameter, dan nilai setiap parameter.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">02</div>
+                <h3>Pemilihan Objek</h3>
+                <p>
+                    Pengguna memilih satu atau beberapa objek
+                    yang ingin diketahui karakteristiknya.
+                </p>
+            </div>
+
+            <div class="process-card">
+                <div class="process-number">03</div>
+                <h3>Hasil Inverse Solaras</h3>
+                <p>
+                    Sistem menampilkan parameter beserta nilai yang
+                    berkaitan dengan objek yang dipilih.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="usage-section" id="template-dataset">
+        <div class="section-heading center">
+            <h2>Template Dataset</h2>
+            <p>
+                Unduh template sesuai format yang ingin digunakan.
+                Kedua format memiliki struktur kolom yang sama.
+            </p>
+        </div>
+
+        <div class="template-grid">
+            <div class="download-card csv-card">
+                <div class="download-icon csv-icon">CSV</div>
+                <h3>Template CSV</h3>
+                <p>
+                    Format data berbasis teks yang dapat dibuka dan
+                    diedit menggunakan Microsoft Excel, Google Sheets,
+                    atau editor teks.
+                </p>
+
+                <a
+                    href="template_solaras.csv"
+                    class="download-button csv-button"
+                    download
+                >
+                    Download Template CSV
+                </a>
+
+                <div class="download-note">
+                    Format: <strong>.csv</strong>
+                    <br>
+                    Kolom pertama: <strong>Objek</strong>
+                </div>
+            </div>
+
+            <div class="download-card excel-card">
+                <div class="download-icon excel-icon">XLSX</div>
+                <h3>Template Excel</h3>
+                <p>
+                    Format lembar kerja yang dapat diedit langsung
+                    menggunakan Microsoft Excel atau aplikasi
+                    spreadsheet lainnya.
+                </p>
+
+                <a
+                    href="template_solaras.xlsx"
+                    class="download-button excel-button"
+                    download
+                >
+                    Download Template Excel
+                </a>
+
+                <div class="download-note">
+                    Format: <strong>.xlsx</strong>
+                    <br>
+                    Kolom pertama: <strong>Objek</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="guide-section" id="buku-panduan">
+        <div class="guide-card">
+            <div>
+                <h2>Buku Panduan Solaras</h2>
+                <p>
+                    Buku panduan penggunaan Solaras akan disediakan
+                    untuk membantu pengguna memahami fungsi dan tahapan
+                    penggunaan sistem.
+                </p>
+            </div>
+
+            <div class="guide-placeholder">
+                <div class="guide-icon">PDF</div>
+                <strong>Buku Panduan</strong>
+                <a href="buku panduan.pdf" target="_blank" rel="noopener noreferrer">
+                    Lihat Buku Panduan
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div>
+            <strong>Solaras</strong>
+            <span>Sistem Rekomendasi Berbasis Soft Set</span>
+        </div>
+        <span>© 2026 Solaras</span>
+    </footer>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inverse Soft Set - Solaras</title>
+    <link rel="stylesheet" href="inverse_soft_set.css">
+</head>
+<body>
+    <div class="app">
+        <header class="app-navbar">
+            <a href="index.html" class="home-button">Home</a>
+            <div class="brand">Solaras</div>
+        </header>
+
+        <main class="main-content">
+            <section class="hero">
+                <h1 class="brand">Inverse Solaras</h1>
+                <p>Unggah dataset, pilih objek semesta, dan tinjau nilai parameternya.</p>
+            </section>
+
+            <nav class="steps">
+                <button type="button" class="step active" data-step="0">
+                    <span>1</span>
+                    <label>Dataset</label>
+                </button>
+                <button type="button" class="step" data-step="1">
+                    <span>2</span>
+                    <label>Semesta</label>
+                </button>
+                <button type="button" class="step" data-step="2">
+                    <span>3</span>
+                    <label>Parameter</label>
+                </button>
+            </nav>
+
+            <section class="panel active" data-panel="0">
+                <div class="section-title">
+                    <span>01</span>
+                    <div>
+                        <h2>Dataset</h2>
+                        <p>Unggah dataset dalam format CSV atau Excel.</p>
+                    </div>
+                </div>
+
+                <label class="upload-box" for="csvFile">
+                    <h3>Upload file CSV atau Excel</h3>
+                    <p>
+                        Kolom pertama merupakan objek dalam himpunan semesta U.
+                        Kolom berikutnya merupakan parameter.
+                    </p>
+                    <input type="file" id="csvFile" accept=".csv,.xlsx,.xls">
+                    <span class="upload-button">Pilih File</span>
+                </label>
+
+                <div id="fileInfo" class="file-info hidden"></div>
+
+                <div id="filePreview" class="file-preview hidden">
+                    <div class="preview-header">
+                        <h3>Pratinjau Dataset</h3>
+                        <span id="previewInfo"></span>
+                    </div>
+                    <div class="preview-table-wrapper">
+                        <table id="previewTable">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <span></span>
+                    <button type="button" class="btn primary next" id="nextDatasetButton" disabled>
+                        Pilih Semesta
+                    </button>
+                </div>
+            </section>
+
+            <section class="panel" data-panel="1">
+                <div class="section-title">
+                    <span>02</span>
+                    <div>
+                        <h2>Pilih Objek Semesta</h2>
+                        <p>Pilih satu atau beberapa objek dari himpunan semesta U.</p>
+                    </div>
+                </div>
+
+                <div id="objectList" class="parameter-grid"></div>
+
+                <p id="selectionCount" class="type">
+                    Belum ada objek dipilih.
+                </p>
+
+                <div class="actions">
+                    <button type="button" class="btn secondary prev">
+                        Kembali
+                    </button>
+                    <button type="button" class="btn primary next" id="nextObjectButton">
+                        Lihat Parameter
+                    </button>
+                </div>
+            </section>
+
+            <section class="panel" data-panel="2">
+                <div class="section-title">
+                    <span>03</span>
+                    <div>
+                        <h2>Hasil Inverse Soft Set</h2>
+                        <p>Ringkasan nilai parameter berdasarkan objek yang dipilih.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Objek Terpilih</h3>
+                    <div id="selectedObject" class="tag-list">-</div>
+                    <p id="parameterCount" class="type">0 parameter</p>
+                </div>
+
+                <div class="table-wrapper" style="margin-top: 20px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Parameter</th>
+                                <th>Nilai</th>
+                            </tr>
+                        </thead>
+                        <tbody id="parameterTable"></tbody>
+                    </table>
+                </div>
+
+                <p class="type" style="margin-top: 16px;">
+                    Nilai numerik ditampilkan sebagai rentang jika satuannya konsisten.
+                    Nilai kategorikal ditampilkan sebagai daftar nilai unik.
+                </p>
+
+                <div class="actions">
+                    <button type="button" class="btn secondary prev">
+                        Kembali
+                    </button>
+                    <button type="button" class="btn primary" id="restartBtn">
+                        Mulai Ulang
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="inverse_soft_set.js"></script>
+</body>
+</html>
