@@ -21,6 +21,18 @@ const filePreview = document.getElementById("filePreview");
 const previewTable = document.getElementById("previewTable");
 const previewInfo = document.getElementById("previewInfo");
 
+function toggleImage() {
+    const image = document.getElementById("csvImage");
+
+    if (!image) return;
+
+    if (image.style.display === "none") {
+        image.style.display = "block";
+    } else {
+        image.style.display = "none";
+    }
+}
+
 function showStep(step) {
     if (step < 0 || step >= panels.length) return;
 
