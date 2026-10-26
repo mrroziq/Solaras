@@ -21,6 +21,22 @@ const filePreview = document.getElementById("filePreview");
 const previewTable = document.getElementById("previewTable");
 const previewInfo = document.getElementById("previewInfo");
 
+const showImageButton = document.getElementById("showImage");
+const closeImageButton = document.getElementById("closeImage");
+const csvImage = document.getElementById("csvImage");
+
+if (showImageButton && csvImage) {
+    showImageButton.addEventListener("click", () => {
+        csvImage.hidden = !csvImage.hidden;
+    });
+}
+
+if (closeImageButton && csvImage) {
+    closeImageButton.addEventListener("click", () => {
+        csvImage.hidden = true;
+    });
+}
+
 function toggleImage() {
     const image = document.getElementById("csvImage");
 
